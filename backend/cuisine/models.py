@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class Recipe(models.Model):
@@ -24,7 +27,7 @@ class Recipe(models.Model):
     description = models.TextField(verbose_name='Описание')
     image = models.ImageField(verbose_name='Загрузить фото')
     author = models.ForeignKey(
-        'User',
+        User,
         verbose_name='Автор',
         related_name='recipes',
         on_delete=models.CASCADE
@@ -71,6 +74,7 @@ class Ingredient(models.Model):
 class Favorite(models.Model):
     """Модель для Избранного."""
     user = models.ForeignKey(
+        User,
         verbose_name='Пользователь',
         related_name='favorites',
         on_delete=models.CASCADE
@@ -86,6 +90,7 @@ class Favorite(models.Model):
 class Order(models.Model):
     """Модель для Покупки."""
     user = models.ForeignKey(
+        User,
         verbose_name='Пользователь',
         related_name='orders',
         on_delete=models.CASCADE
