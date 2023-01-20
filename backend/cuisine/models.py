@@ -39,6 +39,12 @@ class Recipe(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def get_tag(self):
+        return '\n'.join([t.tags for t in self.tag.all()])
+    
+    def get_ingeredient(self):
+        return '\n'.join([i.ingredients for i in self.ingredient.all()])
 
 
 class Tag(models.Model):
@@ -56,20 +62,41 @@ class Tag(models.Model):
         verbose_name='Slug'
     )
 
-
-class Ingredient(models.Model):
+class BaseIngredientWithUnits(models.Model):
     name = models.CharField(
         verbose_name='Название ингредиента',
-        max_length=100
-    )
-    amount = models.IntegerField(
-        verbose_name='Колличество',
-        default=None
+        max_length=50
     )
     measurement_unit = models.CharField(
         verbose_name='Еденици измерения',
         max_length=30
     )
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    base_ingredient = models.ForeignKey(
+        BaseIngredientWithUnits,
+        related_name='ingredient',
+        on_delete=models.CASCADE
+    )
+    amount = models.IntegerField(
+        verbose_name='Колличество',
+        default=None
+    )
+
+    def __str__(self):
+        return f'{self.base_ingredient.name} - {self.amount} {self.base_ingredient.measurement_unit}'
+
+    def get_base_ingredient(self):
+        return self.base_ingredient
+
+    def get_measurement_unit(self):
+        
+        return self.base_ingredient.measurement_unit
+    
 
 class Favorite(models.Model):
     """Модель для Избранного."""
@@ -98,5 +125,6 @@ class Order(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='Рецепт',
-        related_name='orders'
+        related_name='orders',
+        on_delete=models.CASCADE
     )
