@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'cuisine',
+    'users',
     'api',
 ]
 
@@ -105,9 +106,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+AUTH_USER_MODEL = 'users.CustomUser'
 
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'ru-ru'
+
+TIME_ZONE = 'Europe/Moskow'
 
 USE_I18N = True
 
