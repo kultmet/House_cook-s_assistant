@@ -51,15 +51,19 @@ class Tag(models.Model):
     """Модель для Тегов."""
     name = models.CharField(
         max_length=30,
-        verbose_name='Название Тега'
+        verbose_name='Название Тега',
+        unique=True
     )
     color = models.CharField(
         max_length=15,
-        verbose_name='Цвет Тега'
+        verbose_name='Цвет Тега',
+        unique=True
+        
     )
     slug = models.SlugField(
         max_length=45,
-        verbose_name='Slug'
+        verbose_name='Slug',
+        unique=True
     )
 
 class BaseIngredientWithUnits(models.Model):
@@ -113,6 +117,14 @@ class Favorite(models.Model):
         on_delete=models.CASCADE
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite'
+            ),
+        ]
+
 
 class Order(models.Model):
     """Модель для Покупки."""
@@ -128,3 +140,11 @@ class Order(models.Model):
         related_name='orders',
         on_delete=models.CASCADE
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_order'
+            ),
+        ]
