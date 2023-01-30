@@ -40,9 +40,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'djoser',
+    'api',
     'cuisine',
     'users',
-    'api',
+    
 ]
 
 MIDDLEWARE = [
@@ -119,7 +120,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'Europe/Moskow'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 

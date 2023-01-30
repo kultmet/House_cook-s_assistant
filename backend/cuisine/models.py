@@ -41,10 +41,10 @@ class Recipe(models.Model):
         return self.name
     
     def get_tag(self):
-        return '\n'.join([t.tags for t in self.tag.all()])
+        return '\n'.join([t.name for t in self.tag.all()])
     
     def get_ingeredient(self):
-        return '\n'.join([i.ingredients for i in self.ingredient.all()])
+        return '\n'.join([f'{i.base_ingredient.name} - {i.amount} {i.base_ingredient.measurement_unit}' for i in self.ingredient.all()])
 
 
 class Tag(models.Model):
@@ -65,6 +65,12 @@ class Tag(models.Model):
         verbose_name='Slug',
         unique=True
     )
+    class Meta:
+        verbose_name = 'Тэг'
+        verbose_name_plural = 'Тэги'
+    
+    def __str__(self) -> str:
+        return self.name
 
 class BaseIngredientWithUnits(models.Model):
     name = models.CharField(
@@ -78,6 +84,10 @@ class BaseIngredientWithUnits(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = 'Базовый ингредиент'
+        verbose_name_plural = 'Базовые ингредиенты'
 
 
 class Ingredient(models.Model):
@@ -90,6 +100,10 @@ class Ingredient(models.Model):
         verbose_name='Колличество',
         default=None
     )
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
         return f'{self.base_ingredient.name} - {self.amount} {self.base_ingredient.measurement_unit}'
@@ -125,6 +139,9 @@ class Favorite(models.Model):
             ),
         ]
 
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+
 
 class Order(models.Model):
     """Модель для Покупки."""
@@ -148,3 +165,5 @@ class Order(models.Model):
                 name='unique_order'
             ),
         ]
+        verbose_name = 'Покупка'
+        verbose_name_plural = 'Покупки'
