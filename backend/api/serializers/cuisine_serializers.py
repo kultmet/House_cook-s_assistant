@@ -48,23 +48,19 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     # recipes = serializers.SerializerMethodField()
-    recipes = RecipeSerializer(many=True)
-    recipes_count = serializers.SerializerMethodField()
+    # recipes = RecipeSerializer(many=True)
+    # recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('id',)
-        read_only_fields = (
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count'
-        )
+        fields = ('author',)
         model = Follow
     
+    def validated_data(self):
+        return super().validated_data
     
     
-    def get_recipes_count(self, obj):
-        return len(self.recipes)
+    
+    
+    
+    # def get_recipes_count(self, obj):
+    #     return len(self.recipes)
