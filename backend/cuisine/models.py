@@ -4,28 +4,57 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class BaseIngredientWithUnits(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(
+        verbose_name='Название ингредиента',
+        max_length=50,
+        blank=True,# убрать
+        null=True# убрать
+    )
+    measurement_unit = models.CharField(
+        verbose_name='Еденици измерения',
+        max_length=30,
+        blank=True,# убрать
+        null=True# убрать
+    )
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Базовый ингредиент'
+        verbose_name_plural = 'Базовые ингредиенты'
+
+
 class Recipe(models.Model):
     """Модель для Рецепта."""
     name = models.CharField(
         max_length=200,
         verbose_name='Название рецепта'
     )
-    tag = models.ManyToManyField(
+    tags = models.ManyToManyField(
         'Tag',
         verbose_name='теги',
         related_name='recipes',
     )
-    ingredient = models.ManyToManyField(
-        'Ingredient',
+    ingredients = models.ManyToManyField(
+        BaseIngredientWithUnits,
         verbose_name='ingredient',
-        related_name='recipes'
+        related_name='recipes',
+        through='IngredientRecipe'
+        # blank=True,# убрать
+        # null=True
     )
-    coockung_time = models.IntegerField(
+    coockung_time = models.PositiveIntegerField(
         default=1,
         verbose_name='Время приготовления'
     )
     description = models.TextField(verbose_name='Описание')
-    image = models.ImageField(verbose_name='Загрузить фото')
+    image = models.ImageField(
+        verbose_name='Загрузить фото',
+        upload_to='recipes/'
+    )
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
@@ -41,14 +70,49 @@ class Recipe(models.Model):
         return self.name
     
     def get_tag(self):
-        return '\n'.join([t.name for t in self.tag.all()])
+        return '\n'.join([t.name for t in self.tags.all()])
     
     def get_ingeredient(self):
-        return '\n'.join([f'{i.base_ingredient.name} - {i.amount} {i.base_ingredient.measurement_unit}' for i in self.ingredient.all()])
+        return ', \n'.join([f'{i.base_ingredient.name} - {i.amount} {i.base_ingredient.measurement_unit}' for i in IngredientRecipe.objects.filter(recipe=self)])#{i.amount} 
+
+
+class IngredientRecipe(models.Model):
+    base_ingredient = models.ForeignKey(
+        BaseIngredientWithUnits,
+        on_delete=models.CASCADE
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE
+    )
+    amount = models.IntegerField(
+        verbose_name='Колличество',
+        default=None
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return f'{self.base_ingredient.name} - {self.amount} {self.base_ingredient.measurement_unit}'
+    
+    def get_name(self):
+        return self.base_ingredient.name
+
+    def get_base_ingredient(self):
+        return self.base_ingredient
+    
+    def get_id(self):
+        return self.base_ingredient.id
+
+    def get_measurement_unit(self):
+        return self.base_ingredient.measurement_unit
 
 
 class Tag(models.Model):
     """Модель для Тегов."""
+    id = models.AutoField(primary_key=True)
     name = models.CharField(
         max_length=30,
         verbose_name='Название Тега',
@@ -72,48 +136,12 @@ class Tag(models.Model):
     def __str__(self) -> str:
         return self.name
 
-class BaseIngredientWithUnits(models.Model):
-    name = models.CharField(
-        verbose_name='Название ингредиента',
-        max_length=50
-    )
-    measurement_unit = models.CharField(
-        verbose_name='Еденици измерения',
-        max_length=30
-    )
 
-    def __str__(self):
-        return self.name
+
+
+
     
-    class Meta:
-        verbose_name = 'Базовый ингредиент'
-        verbose_name_plural = 'Базовые ингредиенты'
-
-
-class Ingredient(models.Model):
-    base_ingredient = models.ForeignKey(
-        BaseIngredientWithUnits,
-        related_name='ingredient',
-        on_delete=models.CASCADE
-    )
-    amount = models.IntegerField(
-        verbose_name='Колличество',
-        default=None
-    )
-
-    class Meta:
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
-
-    def __str__(self):
-        return f'{self.base_ingredient.name} - {self.amount} {self.base_ingredient.measurement_unit}'
-
-    def get_base_ingredient(self):
-        return self.base_ingredient
-
-    def get_measurement_unit(self):
-        
-        return self.base_ingredient.measurement_unit
+    # def get_base_ingredient_id
     
 
 class Favorite(models.Model):

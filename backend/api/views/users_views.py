@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import get_object_or_404, ListAPIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action, api_view
 from rest_framework.mixins import (
@@ -40,6 +40,17 @@ class FollowViewSet(GenericViewSet): # ВСЕ ПЕРЕДАЛАТЬ НА VIEW Ф�
 #     permission_classes=[IsAuthenticated, ],
 #     # queryset=Follow.objects.all()
 # )
+class Followings(ListAPIView):
+    # queryset = Follow.objects.all()
+    serializer_class = FollowSerializer
+
+    def get_queryset(self):
+        user = get_object_or_404(User, id=self.request.user.id)
+        return Follow.objects.filter(user=user)
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 @api_view(http_method_names=['GET', ])
 def followings(request):
     user = get_object_or_404(User, id=request.user.id)

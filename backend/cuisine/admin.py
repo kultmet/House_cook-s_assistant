@@ -3,17 +3,18 @@ from django.contrib import admin
 from django.db import models
 from django.contrib.admin import widgets
 
-from cuisine.models import Recipe, Tag, Ingredient, Favorite, Order, BaseIngredientWithUnits
+from cuisine.models import Recipe, Tag, IngredientRecipe, Favorite, Order, BaseIngredientWithUnits
 
 
 
-# class IngredienteInline(admin.TabularInline):
-#     formfield_overrides = {models.ManyToManyField: {'widget': widgets.ForeignKeyRawIdWidget}}
-#     model = Ingredient
-#     extra = 0
+class IngredienteInline(admin.TabularInline):
+    # formfield_overrides = {models.ManyToManyField: {'widget': widgets.ForeignKeyRawIdWidget}}
+    model = IngredientRecipe
+    extra = 0
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    inlines = [IngredienteInline]
     list_display = (
         'id',
         'name',
@@ -27,6 +28,9 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def get_author(self, request, obj):
         return request.user
+    
+    # def get_tags(self,obj):
+    #     return [tag.tag for tag in obj..all()]
 
 
 @admin.register(Tag)
@@ -44,8 +48,12 @@ class BaseIngredient(admin.ModelAdmin):
         'name',
         'measurement_unit',
     )
+    fields = (
+        'name',
+        'measurement_unit',
+    )
 
-@admin.register(Ingredient)
+@admin.register(IngredientRecipe)
 class IngedientAdmin(admin.ModelAdmin):
 
     list_display = (
