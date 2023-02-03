@@ -57,16 +57,12 @@ class BaseIngredient(admin.ModelAdmin):
 class IngedientAdmin(admin.ModelAdmin):
 
     list_display = (
+        'pk',
         'get_base_ingredient',
         'amount',
         'get_measurement_unit',
+        'recipe',
     )
-
-    # autocomplete_fields = ('get_measurement_unit',)
-
-    @admin.display(description='Еденици измерения',)
-    def get_measurement_unit(self, obj):
-        return f'{BaseIngredientWithUnits.objects.get()}' #obj.get_measurement_unit
 
 
 @admin.register(Favorite)

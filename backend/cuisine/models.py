@@ -79,11 +79,13 @@ class Recipe(models.Model):
 class IngredientRecipe(models.Model):
     base_ingredient = models.ForeignKey(
         BaseIngredientWithUnits,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='ingredientrecipe'
     )
     recipe = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='ingredientrecipe'
     )
     amount = models.IntegerField(
         verbose_name='Колличество',
@@ -135,13 +137,6 @@ class Tag(models.Model):
     
     def __str__(self) -> str:
         return self.name
-
-
-
-
-
-    
-    # def get_base_ingredient_id
     
 
 class Favorite(models.Model):
