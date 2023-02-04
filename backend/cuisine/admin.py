@@ -3,23 +3,30 @@ from django.contrib import admin
 from django.db import models
 from django.contrib.admin import widgets
 
-from cuisine.models import Recipe, Tag, Ingredient, Favorite, Order, BaseIngredientWithUnits
+from cuisine.models import Recipe, Tag, IngredientRecipe, Favorite, Order, BaseIngredientWithUnits, TagRecipe
 
 
+# class TagChoiceBox(admin.)
 
-# class IngredienteInline(admin.TabularInline):
-#     formfield_overrides = {models.ManyToManyField: {'widget': widgets.ForeignKeyRawIdWidget}}
-#     model = Ingredient
-#     extra = 0
+
+class IngredienteInline(admin.TabularInline):
+    # formfield_overrides = {models.ManyToManyField: {'widget': widgets.ForeignKeyRawIdWidget}}
+    model = IngredientRecipe
+    extra = 0
+
+class TagInline(admin.StackedInline):
+    model = TagRecipe
+    extra = 0
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    inlines = [IngredienteInline, TagInline]
     list_display = (
         'id',
         'name',
         'get_tag',
         'get_ingeredient',
-        'coockung_time',
+        'cooking_time',
         'description',
         'image',
         'author',
@@ -27,6 +34,9 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def get_author(self, request, obj):
         return request.user
+    
+    # def get_tags(self,obj):
+    #     return [tag for tag in obj.tags.all()]
 
 
 @admin.register(Tag)
@@ -44,21 +54,21 @@ class BaseIngredient(admin.ModelAdmin):
         'name',
         'measurement_unit',
     )
+    fields = (
+        'name',
+        'measurement_unit',
+    )
 
-@admin.register(Ingredient)
+@admin.register(IngredientRecipe)
 class IngedientAdmin(admin.ModelAdmin):
 
     list_display = (
+        'pk',
         'get_base_ingredient',
         'amount',
         'get_measurement_unit',
+        'recipe',
     )
-
-    # autocomplete_fields = ('get_measurement_unit',)
-
-    @admin.display(description='Еденици измерения',)
-    def get_measurement_unit(self, obj):
-        return f'{BaseIngredientWithUnits.objects.get()}' #obj.get_measurement_unit
 
 
 @admin.register(Favorite)
@@ -75,4 +85,12 @@ class OrderAdmin(admin.ModelAdmin):
         'id',
         'user',
         'recipe'
+    )
+
+@admin.register(TagRecipe)
+class TagRecipeAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'tag',
+        'recipe',
     )

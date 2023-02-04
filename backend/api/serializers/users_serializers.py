@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
+
 
 from users.models import Follow
 from cuisine.models import Recipe
@@ -9,6 +11,7 @@ from cuisine.models import Recipe
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -20,6 +23,15 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'is_subscribed',
         )
+    def get_is_subscribed(self, obj):
+        if Follow.objects.filter(
+            user=self.context['request'].user, author=obj
+        ).exists():
+            return True
+        else:
+            return False
+        # print(self.context['request'].user)
+        # return 'fuck'
     
     def validate_username(self, value):
         if value == 'me':
