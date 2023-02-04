@@ -1,14 +1,15 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from api.views.cuisine_views import RecipeVievSet, TagViewSet
+from api.views.cuisine_views import RecipeVievSet, TagViewSet, BaseIngredientViewSet
 from api.views.users_views import FollowViewSet, followings, Followings
 
 # from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 app_name = 'api'
 
 router = DefaultRouter()
-router.register('recipes', RecipeVievSet, basename='recipes')
-router.register('tags', TagViewSet, basename='tags')
+router.register(r'recipes', RecipeVievSet, basename='recipes')
+router.register(r'tags', TagViewSet, basename='tags')
+router.register(r'ingredients', BaseIngredientViewSet, basename='ingredients')
 # router.register(r'users', FollowViewSet, basename='subscriptions')# (?P<id>\d+)
 
 

@@ -27,6 +27,33 @@ class BaseIngredientWithUnits(models.Model):
         verbose_name_plural = 'Базовые ингредиенты'
 
 
+class Tag(models.Model):
+    """Модель для Тегов."""
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(
+        max_length=30,
+        verbose_name='Название Тега',
+        unique=True
+    )
+    color = models.CharField(
+        max_length=15,
+        verbose_name='Цвет Тега',
+        unique=True
+        
+    )
+    slug = models.SlugField(
+        max_length=45,
+        verbose_name='Slug',
+        unique=True
+    )
+    class Meta:
+        verbose_name = 'Тэг'
+        verbose_name_plural = 'Тэги'
+    
+    def __str__(self) -> str:
+        return self.name
+
+
 class Recipe(models.Model):
     """Модель для Рецепта."""
     name = models.CharField(
@@ -34,9 +61,10 @@ class Recipe(models.Model):
         verbose_name='Название рецепта'
     )
     tags = models.ManyToManyField(
-        'Tag',
+        Tag,
         verbose_name='теги',
         related_name='recipes',
+        through='TagRecipe'
     )
     ingredients = models.ManyToManyField(
         BaseIngredientWithUnits,
@@ -46,7 +74,7 @@ class Recipe(models.Model):
         # blank=True,# убрать
         # null=True
     )
-    coockung_time = models.PositiveIntegerField(
+    cooking_time = models.PositiveIntegerField(
         default=1,
         verbose_name='Время приготовления'
     )
@@ -70,7 +98,7 @@ class Recipe(models.Model):
         return self.name
     
     def get_tag(self):
-        return '\n'.join([t.name for t in self.tags.all()])
+        return '\n'.join([t.tag.name for t in TagRecipe.objects.filter(recipe=self)])
     
     def get_ingeredient(self):
         return ', \n'.join([f'{i.base_ingredient.name} - {i.amount} {i.base_ingredient.measurement_unit}' for i in IngredientRecipe.objects.filter(recipe=self)])#{i.amount} 
@@ -112,31 +140,17 @@ class IngredientRecipe(models.Model):
         return self.base_ingredient.measurement_unit
 
 
-class Tag(models.Model):
-    """Модель для Тегов."""
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(
-        max_length=30,
-        verbose_name='Название Тега',
-        unique=True
+class TagRecipe(models.Model):
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.CASCADE,
+        related_name='tagrecipe'
     )
-    color = models.CharField(
-        max_length=15,
-        verbose_name='Цвет Тега',
-        unique=True
-        
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='tagrecipe'
     )
-    slug = models.SlugField(
-        max_length=45,
-        verbose_name='Slug',
-        unique=True
-    )
-    class Meta:
-        verbose_name = 'Тэг'
-        verbose_name_plural = 'Тэги'
-    
-    def __str__(self) -> str:
-        return self.name
     
 
 class Favorite(models.Model):

@@ -3,8 +3,10 @@ from django.contrib import admin
 from django.db import models
 from django.contrib.admin import widgets
 
-from cuisine.models import Recipe, Tag, IngredientRecipe, Favorite, Order, BaseIngredientWithUnits
+from cuisine.models import Recipe, Tag, IngredientRecipe, Favorite, Order, BaseIngredientWithUnits, TagRecipe
 
+
+# class TagChoiceBox(admin.)
 
 
 class IngredienteInline(admin.TabularInline):
@@ -12,15 +14,19 @@ class IngredienteInline(admin.TabularInline):
     model = IngredientRecipe
     extra = 0
 
+class TagInline(admin.StackedInline):
+    model = TagRecipe
+    extra = 0
+
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    inlines = [IngredienteInline]
+    inlines = [IngredienteInline, TagInline]
     list_display = (
         'id',
         'name',
         'get_tag',
         'get_ingeredient',
-        'coockung_time',
+        'cooking_time',
         'description',
         'image',
         'author',
@@ -30,7 +36,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return request.user
     
     # def get_tags(self,obj):
-    #     return [tag.tag for tag in obj..all()]
+    #     return [tag for tag in obj.tags.all()]
 
 
 @admin.register(Tag)
@@ -79,4 +85,12 @@ class OrderAdmin(admin.ModelAdmin):
         'id',
         'user',
         'recipe'
+    )
+
+@admin.register(TagRecipe)
+class TagRecipeAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'tag',
+        'recipe',
     )
