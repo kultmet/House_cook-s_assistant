@@ -4,9 +4,10 @@ import base64
 from PIL import Image
 
 import webcolors
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from django.core.files.base import ContentFile
+from rest_framework.exceptions import ValidationError
 from cuisine.models import Recipe, Tag, IngredientRecipe, BaseIngredientWithUnits, Favorite, Order, TagRecipe
 from users.models import Follow
 from api.serializers.users_serializers import UserSerializer
@@ -158,15 +159,121 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
+    def boolean_harvester(self, sample, obj):
+        """
+        Проверяет, что запрос не анонимный.
+        Возвращает наличие обьектов Favorite и Order.
+        """
+        if not self.context['request'].user.is_anonymous:
+            return sample.objects.filter(
+                user=self.context['request'].user, recipe=obj
+            ).exists()
+        else:
+            return False
+
     def get_is_favorited(self, obj):
-        return Favorite.objects.filter(
-            user=self.context['request'].user, recipe=obj
-        ).exists()
-    
+        return self.boolean_harvester(Favorite, obj)
+
     def get_is_in_shopping_cart(self, obj):
-        return Order.objects.filter(
-            user=self.context['request'].user, recipe=obj
-        ).exists()
+        return self.boolean_harvester(Order, obj)
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='recipe.id', read_only=True)
+    name = serializers.StringRelatedField(source='recipe.name', read_only=True)
+    image = serializers.StringRelatedField(source='recipe.image', read_only=True)
+    cooking_time = serializers.IntegerField(source='recipe.cooking_time', read_only=True)
+    class Meta:
+        model = Favorite
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
+
+    def to_internal_value(self, data):
+        return super().to_internal_value(data)
+    
+    def validate_empty_values(self, data):
+        try:
+            self.context['request'] = data['request']
+            self.context['recipe_id'] = data['recipe_id']
+        except KeyError:
+            raise ValidationError('KeyError')
+        return super().validate_empty_values(data)
+    
+    def validate(self, data):
+        try:
+            request = self.context['request']
+            user = request.user
+            recipe_id = self.context['recipe_id']
+        except KeyError:
+            raise ValidationError('KeyError')
+        recipe = get_object_or_404(Recipe, pk=recipe_id)
+        data['recipe'] =  recipe
+        data['user'] = user
+        if request.method == 'POST':
+            if recipe.favorites.select_related('recipe').filter(user=user):
+                raise ValidationError(
+                    'Рецепт уже в избранном'
+                )
+        if request.method == 'DELETE':
+            print('request.method == DELETE')
+            if not recipe.favorites.select_related('recipe').filter(user=user).exists():
+                raise ValidationError(
+                    'Рецепта еще нет в избранном'
+                )
+        return data
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='recipe.id', read_only=True)
+    name = serializers.StringRelatedField(source='recipe.name', read_only=True)
+    image = serializers.StringRelatedField(source='recipe.image', read_only=True)
+    cooking_time = serializers.IntegerField(source='recipe.cooking_time', read_only=True)
+    class Meta:
+        model = Order
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
+
+    def to_internal_value(self, data):
+        return super().to_internal_value(data)
+    
+    def validate_empty_values(self, data):
+        try:
+            self.context['request'] = data['request']
+            self.context['recipe_id'] = data['recipe_id']
+        except KeyError:
+            raise ValidationError('KeyError')
+        return super().validate_empty_values(data)
+    
+    def validate(self, data):
+        try:
+            request = self.context['request']
+            user = request.user
+            recipe_id = self.context['recipe_id']
+        except KeyError:
+            raise ValidationError('KeyError')
+        recipe = get_object_or_404(Recipe, pk=recipe_id)
+        data['recipe'] =  recipe
+        data['user'] = user
+        if request.method == 'POST':
+            if recipe.orders.select_related('recipe').filter(user=user):
+                raise ValidationError(
+                    'Рецепт уже в списке покупок'
+                )
+        if request.method == 'DELETE':
+            print('request.method == DELETE')
+            if not recipe.orders.select_related('recipe').filter(user=user).exists():
+                raise ValidationError(
+                    'Рецепта еще нет в списке покупок'
+                )
+        return data
 
 
 class FollowSerializer(serializers.ModelSerializer):

@@ -100,6 +100,9 @@ class Recipe(models.Model):
     def get_tag(self):
         return '\n'.join([t.tag.name for t in TagRecipe.objects.filter(recipe=self)])
     
+    # def get_tag(self):
+    #     return '\n'.join([t.tag.name for t in TagRecipe.objects.filter(recipe=self)])
+    
     def get_ingeredient(self):
         return ', \n'.join([f'{i.base_ingredient.name} - {i.amount} {i.base_ingredient.measurement_unit}' for i in IngredientRecipe.objects.filter(recipe=self)])#{i.amount} 
 
@@ -151,7 +154,14 @@ class TagRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='tagrecipe'
     )
-    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['tag', 'recipe'],
+                name='unique_tag_for_recipe'
+            ),
+        ]
+        verbose_name_plural = 'Связующая таблици для тегов'
 
 class Favorite(models.Model):
     """Модель для Избранного."""

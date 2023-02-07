@@ -24,12 +24,22 @@ class UserSerializer(serializers.ModelSerializer):
             'is_subscribed',
         )
     def get_is_subscribed(self, obj):
-        if Follow.objects.filter(
-            user=self.context['request'].user, author=obj
-        ).exists():
-            return True
+        # print(self.context['request'].user)
+        if not self.context['request'].user.is_anonymous:
+            print(self.context['request'].user.is_anonymous)
+            
+            return Follow.objects.filter(
+                user=self.context['request'].user, author=obj
+            ).exists()
         else:
+            print(self.context['request'].user.is_anonymous)
             return False
+        # if Follow.objects.filter(
+        #     user=self.context['request'].user, author=obj
+        # ).exists():
+        #     return True
+        # else:
+        #     return False
         # print(self.context['request'].user)
         # return 'fuck'
     
