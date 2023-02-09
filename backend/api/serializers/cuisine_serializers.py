@@ -1,9 +1,6 @@
-# from io import BytesIO, StringIO
 import uuid
 import base64
-from PIL import Image
 
-import webcolors
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
@@ -33,7 +30,6 @@ class TagRecipeSerializer(serializers.ModelSerializer):
     slug = serializers.StringRelatedField(read_only=True, source='tag.slug')
     class Meta:
         model = TagRecipe
-        # model = Tag
         fields = (
             'id',
             'name',
@@ -129,6 +125,24 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 amount=ingredient['amount']
             )
         return recipe
+    
+    def update(self, instance, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        recipe = instance
+        for tag in tags:
+            TagRecipe.objects.get_or_create(tag=tag, recipe=recipe)
+        for ingredient in ingredients:
+            base_ingredient = get_object_or_404(
+                BaseIngredientWithUnits,
+                id=ingredient['id']
+            )
+            IngredientRecipe.objects.get_or_create(
+                base_ingredient=base_ingredient,
+                recipe=recipe,
+                amount=ingredient['amount']
+            )
+        return super().update(instance, validated_data)
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -178,11 +192,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         return self.boolean_harvester(Order, obj)
 
 
+
+
 class FavoriteSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='recipe.id', read_only=True)
     name = serializers.StringRelatedField(source='recipe.name', read_only=True)
     image = serializers.StringRelatedField(source='recipe.image', read_only=True)
-    cooking_time = serializers.IntegerField(source='recipe.cooking_time', read_only=True)
+    cooking_time = serializers.IntegerField(
+        source='recipe.cooking_time', read_only=True
+    )
     class Meta:
         model = Favorite
         fields = (
@@ -191,6 +209,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
+        
 
     def to_internal_value(self, data):
         return super().to_internal_value(data)

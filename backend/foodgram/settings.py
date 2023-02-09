@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
+    'rest_framework.authtoken',
+    # 'rest_framework_simplejwt',
     'djoser',
     'api',
     'cuisine',
@@ -97,13 +98,26 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
+    # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ]
+}
+DJOSER = {
+    'SERIALIZERS': {
+        'user': 'api.serializers.users_serializers.UserSerializer', 
+        'current_user': 'api.serializers.users_serializers.UserSerializer',
+    },
+    'PERMISSIONS': {'user_list': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],},
+    'HIDE_USERS': False
 }
 
 SIMPLE_JWT = {
