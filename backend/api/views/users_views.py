@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
-from rest_framework.generics import get_object_or_404, ListAPIView
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.generics import get_object_or_404
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -8,14 +7,18 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from users.models import Follow
-# from api.serializers.cuisine_serializers import FollowSerializer
 from api.serializers.users_serializers import UserSerializer, FollowSerializer, CreateFollowSerializer
 from djoser.views import UserViewSet
+from api.paginators import CustomPaginator
 
 User = get_user_model()
 
 class MyUserViewSet(UserViewSet):
+    """
+    ViewSet для Пользователя и для Подписок.
+    """
     queryset = User.objects.all()
+    pagination_class = CustomPaginator
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,]
 
@@ -44,8 +47,8 @@ class MyUserViewSet(UserViewSet):
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     def get_serializer_class(self):
+        """Указываем сериализатор для создания Подписки."""
         if self.action == 'follow' and self.request.method == 'POST':
-            print('сработал follow')
             return CreateFollowSerializer
         return super().get_serializer_class()
     
@@ -54,9 +57,11 @@ class MyUserViewSet(UserViewSet):
             detail=False,
             url_path='subscriptions',
             url_name='subscriptions',
-            serializer_class=FollowSerializer
+            serializer_class=FollowSerializer,
+            permission_classes=(IsAuthenticated,)
     )
     def followings(self, request):
+        """Список Подписок."""
         user = get_object_or_404(User, id=request.user.id)
         queryset = self.filter_queryset(User.objects.filter(following__user=user))
         page = self.paginate_queryset(queryset)
@@ -73,8 +78,10 @@ class MyUserViewSet(UserViewSet):
             url_path='subscribe',
             url_name='subscribe',
             serializer_class=CreateFollowSerializer,
+            permission_classes=(IsAuthenticated,)
     )
     def follow(self, request, id):
+        """Подписаться на автора, Отписаться от автора."""
         data = {}
         data['request'] = request
         data['view'] = self

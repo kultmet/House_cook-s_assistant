@@ -3,11 +3,21 @@ from datetime import date
 from borb.pdf import Document, Page, SingleColumnLayout, Paragraph, PDF
 from cuisine.models import Recipe, Tag, BaseIngredientWithUnits, Favorite, Order, IngredientRecipe
 
-def txt_generator(values, user):
-    with open(Path(f'{user}_{date.today()}.txt'), 'w', encoding='UTF-8') as file:
-        for value in values:
-            value += '\n'
-            file.write(value)
+def txt_generator(values, filename) -> str:
+    """Генерирует txt файл и возвращает подготовленую строку обратно."""
+    prepared_string = ''
+    with open(filename, 'w', encoding='UTF-8') as file:
+        for result in values:
+            prepared_string += result[
+                'base_ingredient__name'
+            ].title() + ' - ' + str(result[
+                'amount__sum'
+            ]) + ' ' + result[
+                'base_ingredient__measurement_unit'
+            ] +'\n'
+        file.write(prepared_string)
+    return prepared_string
+
 
 
 # def pdf_generator(values, user):

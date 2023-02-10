@@ -3,20 +3,16 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-
 class BaseIngredientWithUnits(models.Model):
+    """Базавый ингредиент."""
     id = models.AutoField(primary_key=True)
     name = models.CharField(
         verbose_name='Название ингредиента',
         max_length=50,
-        blank=True,# убрать
-        null=True# убрать
     )
     measurement_unit = models.CharField(
         verbose_name='Еденици измерения',
         max_length=30,
-        blank=True,# убрать
-        null=True# убрать
     )
 
     def __str__(self):
@@ -71,8 +67,6 @@ class Recipe(models.Model):
         verbose_name='ingredient',
         related_name='recipes',
         through='IngredientRecipe'
-        # blank=True,# убрать
-        # null=True
     )
     cooking_time = models.PositiveIntegerField(
         default=1,
@@ -100,14 +94,15 @@ class Recipe(models.Model):
     def get_tag(self):
         return '\n'.join([t.tag.name for t in TagRecipe.objects.filter(recipe=self)])
     
-    # def get_tag(self):
-    #     return '\n'.join([t.tag.name for t in TagRecipe.objects.filter(recipe=self)])
-    
     def get_ingeredient(self):
         return ', \n'.join([f'{i.base_ingredient.name} - {i.amount} {i.base_ingredient.measurement_unit}' for i in IngredientRecipe.objects.filter(recipe=self)])#{i.amount} 
 
 
 class IngredientRecipe(models.Model):
+    """
+    Промежуточная таблица для привязки ингредиента к рецепту.
+    Принимает колличество ингредиента для конкретного рецепта.
+    """
     base_ingredient = models.ForeignKey(
         BaseIngredientWithUnits,
         on_delete=models.CASCADE,
@@ -144,6 +139,7 @@ class IngredientRecipe(models.Model):
 
 
 class TagRecipe(models.Model):
+    """Промежуточная таблица для привязки тэга к рецепту."""
     tag = models.ForeignKey(
         Tag,
         on_delete=models.CASCADE,
@@ -162,6 +158,7 @@ class TagRecipe(models.Model):
             ),
         ]
         verbose_name_plural = 'Связующая таблици для тегов'
+
 
 class Favorite(models.Model):
     """Модель для Избранного."""

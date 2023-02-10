@@ -1,7 +1,5 @@
-from django import forms
 from django.contrib import admin 
 from django.db import models
-from django.contrib.admin import widgets
 from django.forms import CheckboxSelectMultiple
 
 from cuisine.models import Recipe, Tag, IngredientRecipe, Favorite, Order, BaseIngredientWithUnits, TagRecipe
@@ -42,8 +40,6 @@ class RecipeAdmin(admin.ModelAdmin):
         'name',
         ('image',
         'author',),
-        # 'tags__tag__name',
-        # 'ingeredients',
         'description',
         'cooking_time',
     )
@@ -75,7 +71,6 @@ class BaseIngredient(admin.ModelAdmin):
         'name',
         'measurement_unit',
     )
-    # autocomplete_fields = ('measurement_unit',)
 
 @admin.register(IngredientRecipe)
 class IngedientAdmin(admin.ModelAdmin):
@@ -104,7 +99,8 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'user',
-        'recipe'
+        'recipe',
+        'recipe_id'
     )
 
 @admin.register(TagRecipe)

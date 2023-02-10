@@ -13,6 +13,7 @@ from api.serializers.users_serializers import UserSerializer
 # MediumSeaGreen	#3CB371 обед
 # BlueViolet	#8A2BE2  ужин
 class TagSerializer(serializers.ModelSerializer):
+    """Сериализатор для Тэгов."""
     class Meta:
         model = Tag
         fields = (
@@ -24,6 +25,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class TagRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для привязки Тэга к Рецепту."""
     id = serializers.PrimaryKeyRelatedField(read_only=True, source='tag.id')
     name = serializers.StringRelatedField(read_only=True, source='tag.name')
     color = serializers.StringRelatedField(read_only=True, source='tag.color')
@@ -39,6 +41,7 @@ class TagRecipeSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор для вывода Ингредиента к Рецепту. Только чтение."""
     name = serializers.StringRelatedField(
         read_only=True, source='base_ingredient.name'
     )
@@ -61,6 +64,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class BaseIngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор для привязки Ингредиента к Рецепту."""
     id = serializers.IntegerField()
     amount = serializers.IntegerField(write_only=True)
     class Meta:
@@ -90,6 +94,7 @@ class Base64ToImageField(serializers.ImageField):
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания Рецепта."""
     ingredients = BaseIngredientSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())#
     image = Base64ToImageField()
@@ -106,6 +111,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         )
     
     def to_representation(self, instance):
+        """После создания рецепта, перенаправляет на Сериализатор Рецепта(чтение)."""
         return RecipeSerializer(instance=instance, context=self.context).data
     
     def create(self, validated_data):
@@ -146,7 +152,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для рецептов."""
+    """Сериализатор для рецептов. Только чтоение."""
     author = UserSerializer(read_only=True)
     ingredients = IngredientSerializer(many=True, source='ingredientrecipe')
     tags = TagRecipeSerializer(many=True, source='tagrecipe', read_only=True)
@@ -195,6 +201,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериолизатор для Избранного Рецепта."""
     id = serializers.IntegerField(source='recipe.id', read_only=True)
     name = serializers.StringRelatedField(source='recipe.name', read_only=True)
     image = serializers.StringRelatedField(source='recipe.image', read_only=True)
@@ -209,12 +216,9 @@ class FavoriteSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
-        
 
-    def to_internal_value(self, data):
-        return super().to_internal_value(data)
-    
     def validate_empty_values(self, data):
+        """Формируем словарь context и проверяем ключи."""
         try:
             self.context['request'] = data['request']
             self.context['recipe_id'] = data['recipe_id']
@@ -223,6 +227,10 @@ class FavoriteSerializer(serializers.ModelSerializer):
         return super().validate_empty_values(data)
     
     def validate(self, data):
+        if self.context['request'].user.is_anonymous:
+            raise ValidationError(
+                'Данные пользователя не были предоставлены.'
+            )
         try:
             request = self.context['request']
             user = request.user
@@ -247,6 +255,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    """Сериализатор для Корзины Покупок."""
     id = serializers.IntegerField(source='recipe.id', read_only=True)
     name = serializers.StringRelatedField(source='recipe.name', read_only=True)
     image = serializers.StringRelatedField(source='recipe.image', read_only=True)
@@ -259,11 +268,9 @@ class OrderSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
-
-    def to_internal_value(self, data):
-        return super().to_internal_value(data)
     
     def validate_empty_values(self, data):
+        """Формируем словарь context и проверяем ключи."""
         try:
             self.context['request'] = data['request']
             self.context['recipe_id'] = data['recipe_id']
@@ -272,6 +279,10 @@ class OrderSerializer(serializers.ModelSerializer):
         return super().validate_empty_values(data)
     
     def validate(self, data):
+        if self.context['request'].user.is_anonymous:
+            raise ValidationError(
+                'Данные пользователя не были предоставлены.'
+            )
         try:
             request = self.context['request']
             user = request.user
@@ -287,27 +298,8 @@ class OrderSerializer(serializers.ModelSerializer):
                     'Рецепт уже в списке покупок'
                 )
         if request.method == 'DELETE':
-            print('request.method == DELETE')
             if not recipe.orders.select_related('recipe').filter(user=user).exists():
                 raise ValidationError(
                     'Рецепта еще нет в списке покупок'
                 )
         return data
-
-
-class FollowSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
-    )
-    recipes = RecipeSerializer(many=True, read_only=True)
-
-    class Meta:
-        fields = ('author', 'recipes',)
-        model = Follow
-    
-    def validate_following(self, value):
-        if value == self._context['request'].user:
-            raise serializers.ValidationError(
-                "На себя подписываться безсмысленно!"
-            )
-        return value

@@ -10,6 +10,7 @@ from users.models import Follow
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для Пользователя."""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -38,6 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(UserSerializer):
+    """Сериализатор Подписки на автора. Только чтение."""
     id = serializers.IntegerField(read_only=True)
     recipes = ShortRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
@@ -81,6 +83,7 @@ class CreateFollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ()
+
     def validate_empty_values(self, data):
         print(data, 'valida empty')
         try:
@@ -91,7 +94,6 @@ class CreateFollowSerializer(serializers.ModelSerializer):
         return super().validate_empty_values(data)
     
     def validate(self, data):
-        print(self.context, 'valid')
         try:
             request = self.context['request']
             user = request.user
@@ -114,6 +116,6 @@ class CreateFollowSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        print(instance, 'to repr')
+        """Перенаправляет на сериализатор Подписки(только чтение)"""
         instance = instance['author']
         return FollowSerializer(instance=instance, context=self.context).data
