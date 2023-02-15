@@ -1,13 +1,15 @@
 from django.contrib.auth import get_user_model
 from rest_framework.generics import get_object_or_404
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from users.models import Follow
-from api.serializers.users_serializers import UserSerializer, FollowSerializer, CreateFollowSerializer
+from api.serializers.users_serializers import (
+    UserSerializer, FollowSerializer, CreateFollowSerializer
+)
 from djoser.views import UserViewSet
 from api.paginators import CustomPaginator
 
@@ -63,7 +65,9 @@ class MyUserViewSet(UserViewSet):
     def followings(self, request):
         """Список Подписок."""
         user = get_object_or_404(User, id=request.user.id)
-        queryset = self.filter_queryset(User.objects.filter(following__user=user))
+        queryset = self.filter_queryset(
+            User.objects.filter(following__user=user)
+        )
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -93,7 +97,11 @@ class MyUserViewSet(UserViewSet):
                 author=serializer.validated_data['author']
             )
             headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED,
+                headers=headers
+            )
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']

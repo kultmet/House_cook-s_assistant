@@ -8,7 +8,7 @@ class BaseIngredientWithUnits(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(
         verbose_name='Название ингредиента',
-        max_length=50,
+        max_length=225,
     )
     measurement_unit = models.CharField(
         verbose_name='Еденици измерения',
@@ -92,10 +92,18 @@ class Recipe(models.Model):
         return self.name
     
     def get_tag(self):
-        return '\n'.join([t.tag.name for t in TagRecipe.objects.filter(recipe=self)])
+        return '\n'.join(
+            [t.tag.name for t in TagRecipe.objects.filter(recipe=self)]
+        )
     
     def get_ingeredient(self):
-        return ', \n'.join([f'{i.base_ingredient.name} - {i.amount} {i.base_ingredient.measurement_unit}' for i in IngredientRecipe.objects.filter(recipe=self)])#{i.amount} 
+        return ', \n'.join(
+            [
+            f'{i.base_ingredient.name} - '
+            f'{i.amount} {i.base_ingredient.measurement_unit}' 
+            for i in IngredientRecipe.objects.filter(recipe=self)
+            ]
+        )
 
 
 class IngredientRecipe(models.Model):
@@ -123,7 +131,10 @@ class IngredientRecipe(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return f'{self.base_ingredient.name} - {self.amount} {self.base_ingredient.measurement_unit}'
+        return (
+            f'{self.base_ingredient.name}'
+            f' - {self.amount} {self.base_ingredient.measurement_unit}'
+        )
     
     def get_name(self):
         return self.base_ingredient.name

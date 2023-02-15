@@ -4,15 +4,26 @@ from datetime import date
 
 from django.http import HttpResponse
 from django.conf import settings
-from django.db.models import Sum, Count
+from django.db.models import Sum
 from django_filters import rest_framework as filters
+from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import api_view, action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework import status, validators
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from cuisine.models import Recipe, Tag, BaseIngredientWithUnits, Favorite, Order, IngredientRecipe
+from rest_framework import status
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated
+)
+from cuisine.models import (
+    Recipe,
+    Tag,
+    BaseIngredientWithUnits,
+    Favorite,
+    Order,
+    IngredientRecipe
+)
 from api.serializers.cuisine_serializers import (
     TagSerializer,
     RecipeSerializer,
@@ -30,6 +41,9 @@ class BaseIngredientViewSet(ReadOnlyModelViewSet):
     """ViewSet для Базового Ингредиента."""
     queryset = BaseIngredientWithUnits.objects.all()
     serializer_class = BaseIngredientSerializer
+    pagination_class = None
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter,)
+    search_fields = ('^name',)
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -42,7 +56,6 @@ class RecipeVievSet(ModelViewSet):
     """ViewSet для Рецепта."""
     queryset = Recipe.objects.all()
     pagination_class = CustomPaginator
-    # pagi = (PageNumberPagination,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilterSet
@@ -65,8 +78,6 @@ class RecipeVievSet(ModelViewSet):
     def download_order(self, request):
         """Сохраняем файл со списком Покупок."""
         user = request.user
-        # my_orders = user.orders.select_related('recipe')
-        # recipes = Recipe.objects.filter(orders__user=user)
         ingredients = IngredientRecipe.objects.filter(
             recipe__orders__user=user
         )
@@ -83,20 +94,6 @@ class RecipeVievSet(ModelViewSet):
             )
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
-        # print(ingredients.annotate(Sum('amount')), 'annotate')
-        # calculation_results = {}
-        # for i in ingredients.values('base_ingredient__name').distinct():
-        #     print(i.keys(), i.values())
-        # # print(my_orders)
-        # print(recipes)
-        # print(ingredients)
-        
-        # return Response(calculation_results)
-        
-            # filename = f'{request.user.username}_{date.today()}.txt'
-            # file_adrass = Path(os.path.join(settings.ORDERS_ROOT, filename))
-            # txt_generator(calculation_results, file_adrass)
-            # file = open(file_adrass, 'r', encoding='UTF-8').read()
             
 
 @api_view(http_method_names=['POST', 'DELETE'])
@@ -135,5 +132,4 @@ def order(request, id):
     recipe = serializer.validated_data['recipe']
     order = get_object_or_404(Order, user=user, recipe=recipe)
     order.delete()
-    
     return Response(status=status.HTTP_204_NO_CONTENT)

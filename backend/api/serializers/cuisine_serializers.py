@@ -5,13 +5,18 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
-from cuisine.models import Recipe, Tag, IngredientRecipe, BaseIngredientWithUnits, Favorite, Order, TagRecipe
-from users.models import Follow
+from cuisine.models import (
+    Recipe,
+    Tag,
+    IngredientRecipe,
+    BaseIngredientWithUnits,
+    Favorite,
+    Order,
+    TagRecipe
+)
 from api.serializers.users_serializers import UserSerializer
 
-# Coral	#FF7F50 завтрак
-# MediumSeaGreen	#3CB371 обед
-# BlueViolet	#8A2BE2  ужин
+
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для Тэгов."""
     class Meta:
@@ -96,7 +101,9 @@ class Base64ToImageField(serializers.ImageField):
 class CreateRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для создания Рецепта."""
     ingredients = BaseIngredientSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())#
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all()
+    )
     image = Base64ToImageField()
     text = serializers.CharField(source='description')
     class Meta:
@@ -111,7 +118,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         )
     
     def to_representation(self, instance):
-        """После создания рецепта, перенаправляет на Сериализатор Рецепта(чтение)."""
+        """
+        После создания рецепта, перенаправляет на Сериализатор Рецепта(чтение).
+        """
         return RecipeSerializer(instance=instance, context=self.context).data
     
     def create(self, validated_data):
@@ -203,8 +212,12 @@ class RecipeSerializer(serializers.ModelSerializer):
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериолизатор для Избранного Рецепта."""
     id = serializers.IntegerField(source='recipe.id', read_only=True)
-    name = serializers.StringRelatedField(source='recipe.name', read_only=True)
-    image = serializers.StringRelatedField(source='recipe.image', read_only=True)
+    name = serializers.StringRelatedField(
+        source='recipe.name', read_only=True
+    )
+    image = serializers.StringRelatedField(
+        source='recipe.image', read_only=True
+    )
     cooking_time = serializers.IntegerField(
         source='recipe.cooking_time', read_only=True
     )
@@ -247,7 +260,9 @@ class FavoriteSerializer(serializers.ModelSerializer):
                 )
         if request.method == 'DELETE':
             print('request.method == DELETE')
-            if not recipe.favorites.select_related('recipe').filter(user=user).exists():
+            if not recipe.favorites.select_related(
+                'recipe'
+            ).filter(user=user).exists():
                 raise ValidationError(
                     'Рецепта еще нет в избранном'
                 )
@@ -257,9 +272,15 @@ class FavoriteSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     """Сериализатор для Корзины Покупок."""
     id = serializers.IntegerField(source='recipe.id', read_only=True)
-    name = serializers.StringRelatedField(source='recipe.name', read_only=True)
-    image = serializers.StringRelatedField(source='recipe.image', read_only=True)
-    cooking_time = serializers.IntegerField(source='recipe.cooking_time', read_only=True)
+    name = serializers.StringRelatedField(
+        source='recipe.name', read_only=True
+    )
+    image = serializers.StringRelatedField(
+        source='recipe.image', read_only=True
+    )
+    cooking_time = serializers.IntegerField(
+        source='recipe.cooking_time', read_only=True
+    )
     class Meta:
         model = Order
         fields = (
@@ -298,7 +319,9 @@ class OrderSerializer(serializers.ModelSerializer):
                     'Рецепт уже в списке покупок'
                 )
         if request.method == 'DELETE':
-            if not recipe.orders.select_related('recipe').filter(user=user).exists():
+            if not recipe.orders.select_related(
+                'recipe'
+            ).filter(user=user).exists():
                 raise ValidationError(
                     'Рецепта еще нет в списке покупок'
                 )
