@@ -1,8 +1,17 @@
-from django.contrib import admin 
+from django.contrib import admin
 from django.db import models
 from django.forms import CheckboxSelectMultiple
 
-from cuisine.models import Recipe, Tag, IngredientRecipe, Favorite, Order, BaseIngredientWithUnits, TagRecipe
+from cuisine.models import (
+    Recipe,
+    Tag,
+    IngredientRecipe,
+    Favorite,
+    Order,
+    BaseIngredientWithUnits,
+    TagRecipe
+)
+
 
 class ForModelAdmin(admin.ModelAdmin):
     formfield_overrides = {
@@ -13,19 +22,18 @@ class ForModelAdmin(admin.ModelAdmin):
 class IngredienteInline(admin.TabularInline):
     model = IngredientRecipe
     extra = 0
-    
 
 
 class TagInline(admin.StackedInline):
     model = TagRecipe
     extra = 0
     max_num = 3
-    
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     model = Recipe
-    inlines = [IngredienteInline, TagInline]#
+    inlines = [IngredienteInline, TagInline]
     list_display = (
         'id',
         'name',
@@ -38,14 +46,14 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     fields = (
         'name',
-        ('image',
-        'author',),
+        ('image', 'author',),
         'description',
         'cooking_time',
     )
 
     def get_author(self, request, obj):
         return request.user
+
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -58,19 +66,20 @@ class TagAdmin(admin.ModelAdmin):
         'slug',
     )
 
+
 @admin.register(BaseIngredientWithUnits)
 class BaseIngredient(admin.ModelAdmin):
-    
+
     list_display = (
         'id',
         'name',
         'measurement_unit',
     )
-    
     fields = (
         'name',
         'measurement_unit',
     )
+
 
 @admin.register(IngredientRecipe)
 class IngedientAdmin(admin.ModelAdmin):
@@ -83,6 +92,7 @@ class IngedientAdmin(admin.ModelAdmin):
         'recipe',
     )
 
+
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = (
@@ -91,8 +101,10 @@ class FavoriteAdmin(admin.ModelAdmin):
         'recipe',
         'get_recipe_id',
     )
+
     def get_recipe_id(self, obj):
         return obj.recipe.id
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -103,9 +115,10 @@ class OrderAdmin(admin.ModelAdmin):
         'recipe_id'
     )
 
+
 @admin.register(TagRecipe)
 class TagRecipeAdmin(admin.ModelAdmin):
-    
+
     list_display = (
         'id',
         'tag',

@@ -14,6 +14,7 @@ class RecipeFilterSet(filters.FilterSet):
     is_in_shopping_cart = django_filters.NumberFilter(
         method='is_in_shopping_cart_filter', distinct=True
     )
+
     class Meta:
         model = Recipe
         fields = (
@@ -22,21 +23,22 @@ class RecipeFilterSet(filters.FilterSet):
             'author',
             'tags'
         )
+
     def tags_filter(self, queryset, name, value):
-        queryset = Recipe.objects.none() 
+        queryset = Recipe.objects.none()
         for tag_slug in value:
             queryset = queryset.union(
                 Recipe.objects.filter(tags__slug=tag_slug)
             )
         return queryset
-    
+
     def binary_validator(self, name, value):
         if value < 0 or value > 1:
             raise ValidationError(
                 f'Параметр "{name}" может иметь значения "0" или "1".'
             )
         return value
-    
+
     def returns_orthodox_queryset(self, value, result, exclude_resilt):
         querysets = {0: exclude_resilt, 1: result}
         try:
@@ -44,10 +46,9 @@ class RecipeFilterSet(filters.FilterSet):
         except KeyError:
             raise ValidationError(f'Что-то пошло не так {KeyError}')
 
-
     def is_favorited_filter(self, queryset, name, value):
         """
-        Фильтр Для поля is_favorited. 
+        Фильтр Для поля is_favorited.
         Выводит только избранное или исключает избранное.
         """
         self.binary_validator(name=name, value=value)
@@ -63,7 +64,7 @@ class RecipeFilterSet(filters.FilterSet):
             result=favorite_recipes,
             exclude_resilt=exclude_favorite_recipes
         )
-    
+
     def is_in_shopping_cart_filter(self, queryset, name, value):
         self.binary_validator(name=name, value=value)
         user = self.request.user

@@ -15,6 +15,7 @@ from api.paginators import CustomPaginator
 
 User = get_user_model()
 
+
 class MyUserViewSet(UserViewSet):
     """
     ViewSet для Пользователя и для Подписок.
@@ -27,15 +28,15 @@ class MyUserViewSet(UserViewSet):
     def activation(self, request,args, kwargs):
         """Удаление эндпоинта."""
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+
     def resend_activation(self, request, *args, kwargs):
         """Удаление эндпоинта."""
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+
     def set_username(self, request,args, kwargs):
         """Удаление эндпоинта."""
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+
     def reset_password(self, request, args, **kwargs):
         """Удаление эндпоинта."""
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -47,20 +48,20 @@ class MyUserViewSet(UserViewSet):
     def reset_username_confirm(self, request, *args, **kwargs):
         """Удаление эндпоинта."""
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+
     def get_serializer_class(self):
         """Указываем сериализатор для создания Подписки."""
         if self.action == 'follow' and self.request.method == 'POST':
             return CreateFollowSerializer
         return super().get_serializer_class()
-    
+
     @action(
-            methods=['get',],
-            detail=False,
-            url_path='subscriptions',
-            url_name='subscriptions',
-            serializer_class=FollowSerializer,
-            permission_classes=(IsAuthenticated,)
+        methods=['get',],
+        detail=False,
+        url_path='subscriptions',
+        url_name='subscriptions',
+        serializer_class=FollowSerializer,
+        permission_classes=(IsAuthenticated,)
     )
     def followings(self, request):
         """Список Подписок."""
@@ -77,12 +78,12 @@ class MyUserViewSet(UserViewSet):
         return Response(serializer.data)
 
     @action(
-            methods=['POST', 'DELETE'],
-            detail=True,
-            url_path='subscribe',
-            url_name='subscribe',
-            serializer_class=CreateFollowSerializer,
-            permission_classes=(IsAuthenticated,)
+        methods=['POST', 'DELETE'],
+        detail=True,
+        url_path='subscribe',
+        url_name='subscribe',
+        serializer_class=CreateFollowSerializer,
+        permission_classes=(IsAuthenticated,)
     )
     def follow(self, request, id):
         """Подписаться на автора, Отписаться от автора."""

@@ -67,13 +67,13 @@ class RecipeVievSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-    
+
     @action(
-            methods=['get', ],
-            url_path='download_shopping_cart',
-            queryset=Order.objects.all(),
-            detail=False,
-            permission_classes = (IsAuthenticated,)
+        methods=['get', ],
+        url_path='download_shopping_cart',
+        queryset=Order.objects.all(),
+        detail=False,
+        permission_classes=(IsAuthenticated,)
     )
     def download_order(self, request):
         """Сохраняем файл со списком Покупок."""
@@ -89,12 +89,12 @@ class RecipeVievSet(ModelViewSet):
         file_adrass = Path(os.path.join(settings.ORDERS_ROOT, filename))
         result = txt_generator(calculation_results, file_adrass)
         response = HttpResponse(
-                result,
-                content_type='text/txt',
-            )
+            result,
+            content_type='text/txt',
+        )
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
-            
+
 
 @api_view(http_method_names=['POST', 'DELETE'])
 def favorite(request, id):
@@ -115,7 +115,8 @@ def favorite(request, id):
     favorite_recipe.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
-@api_view(http_method_names=['POST', 'DELETE'])# Еще метод get
+
+@api_view(http_method_names=['POST', 'DELETE'])
 def order(request, id):
     """Добавляет в Корзину Покупок. Удаляет из Корзину Покупок."""
     data = {}
