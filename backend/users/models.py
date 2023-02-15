@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
+    """Модель Пользователя."""
     email = models.EmailField(
         verbose_name='Електронная почта',
         unique=True,
@@ -15,6 +16,7 @@ class CustomUser(AbstractUser):
 
 
 class Follow(models.Model):
+    """Модель Подписки на автора."""
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,

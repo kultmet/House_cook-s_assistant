@@ -1,18 +1,22 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from api.views.cuisine_views import RecipeVievSet, TagViewSet
-from api.views.users_views import FollowViewSet
 
-# from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from api.views.cuisine_views import (
+    RecipeVievSet, TagViewSet, BaseIngredientViewSet, favorite, order
+)
+from api.views.users_views import MyUserViewSet
+
 app_name = 'api'
 
 router = DefaultRouter()
-router.register('recipes', RecipeVievSet, basename='recipes')
-router.register('tags', TagViewSet, basename='tags')
-router.register(r'users/(?P<id>\d+)/subscribe/', FollowViewSet, basename='subscriptions')
+router.register(r'recipes', RecipeVievSet, basename='recipes')
+router.register(r'tags', TagViewSet, basename='tags')
+router.register(r'ingredients', BaseIngredientViewSet, basename='ingredients')
+router.register(r'users', MyUserViewSet, basename='users')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.jwt')),
+    path('recipes/<id>/favorite/', favorite, name='favorite'),
+    path('recipes/<id>/shopping_cart/', order, name='shopping_cart'),
+    path('auth/', include('djoser.urls.authtoken')),
 ]
