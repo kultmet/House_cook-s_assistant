@@ -132,6 +132,8 @@ dmypy.json
 # .idea
 .idea
 
+
 # media folder
 
 backend/media/
+
