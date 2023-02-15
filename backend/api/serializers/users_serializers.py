@@ -9,6 +9,7 @@ from users.models import Follow
 
 User = get_user_model()
 
+
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для Пользователя."""
     is_subscribed = serializers.SerializerMethodField()
@@ -31,7 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
             ).exists()
         else:
             return False
-    
+
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError('А username не может быть "me"')
@@ -92,16 +93,16 @@ class CreateFollowSerializer(serializers.ModelSerializer):
         except KeyError:
             raise ValidationError('KeyError')
         return super().validate_empty_values(data)
-    
+
     def validate(self, data):
         try:
             request = self.context['request']
             user = request.user
             author_id = self.context['view'].kwargs.get('id')
         except KeyError:
-            raise ValidationError(f'KeyError')
+            raise ValidationError('KeyError')
         author = get_object_or_404(User, id=author_id)
-        data['author'] =  author
+        data['author'] = author
         data['user'] = user
         if request.method == 'POST':
             if Follow.objects.filter(user=user, author=author).exists():

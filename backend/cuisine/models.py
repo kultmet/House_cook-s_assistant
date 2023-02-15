@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class BaseIngredientWithUnits(models.Model):
     """Базавый ингредиент."""
     id = models.AutoField(primary_key=True)
@@ -17,7 +18,7 @@ class BaseIngredientWithUnits(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     class Meta:
         verbose_name = 'Базовый ингредиент'
         verbose_name_plural = 'Базовые ингредиенты'
@@ -35,17 +36,17 @@ class Tag(models.Model):
         max_length=15,
         verbose_name='Цвет Тега',
         unique=True
-        
     )
     slug = models.SlugField(
         max_length=45,
         verbose_name='Slug',
         unique=True
     )
+
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
-    
+
     def __str__(self) -> str:
         return self.name
 
@@ -83,27 +84,25 @@ class Recipe(models.Model):
         related_name='recipes',
         on_delete=models.CASCADE
     )
-    
+
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-    
+
     def __str__(self):
         return self.name
-    
+
     def get_tag(self):
         return '\n'.join(
             [t.tag.name for t in TagRecipe.objects.filter(recipe=self)]
         )
-    
+
     def get_ingeredient(self):
-        return ', \n'.join(
-            [
+        return ', \n'.join([
             f'{i.base_ingredient.name} - '
-            f'{i.amount} {i.base_ingredient.measurement_unit}' 
+            f'{i.amount} {i.base_ingredient.measurement_unit}'
             for i in IngredientRecipe.objects.filter(recipe=self)
-            ]
-        )
+        ])
 
 
 class IngredientRecipe(models.Model):
@@ -135,13 +134,13 @@ class IngredientRecipe(models.Model):
             f'{self.base_ingredient.name}'
             f' - {self.amount} {self.base_ingredient.measurement_unit}'
         )
-    
+
     def get_name(self):
         return self.base_ingredient.name
 
     def get_base_ingredient(self):
         return self.base_ingredient
-    
+
     def get_id(self):
         return self.base_ingredient.id
 
@@ -161,6 +160,7 @@ class TagRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='tagrecipe'
     )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
