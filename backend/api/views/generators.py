@@ -9,7 +9,7 @@ def txt_generator(values, filename) -> str:
                 'amount__sum'
             ]) + ' ' + result[
                 'base_ingredient__measurement_unit'
-            ] +'\n'
+            ] + '\n'
         file.write(prepared_string)
     return prepared_string
 

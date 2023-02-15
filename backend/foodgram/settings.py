@@ -81,7 +81,7 @@ DATABASES = {
         'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': os.getenv('POSTGRES_PORT')
     }
-} 
+}
 
 # DATABASES = {
 #     'default': {
@@ -123,7 +123,7 @@ REST_FRAMEWORK = {
 }
 DJOSER = {
     'SERIALIZERS': {
-        'user': 'api.serializers.users_serializers.UserSerializer', 
+        'user': 'api.serializers.users_serializers.UserSerializer',
         'current_user': 'api.serializers.users_serializers.UserSerializer',
     },
     'PERMISSIONS': {'user_list': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],},

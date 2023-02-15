@@ -7,17 +7,19 @@ from django.conf import settings
 from cuisine.models import BaseIngredientWithUnits as Ingredient
 from cuisine.models import Tag
 
+
 class Command(BaseCommand):
     """Команда для загрузки csv файлов в базу данных:
      python manage.py fill_database."""
-    
+
     help = 'Загрузка информации из csv файлов в базу данных'
 
     def handle(self, *args, **options):
-        with open(os.path.join(settings.BASE_DIR, 'ingredients.csv'),
-                    'rt', encoding='utf-8') as csv_file:
+        with open(
+            os.path.join(settings.BASE_DIR, 'ingredients.csv'),
+            'rt', encoding='utf-8'
+        ) as csv_file:
             render = csv.reader(csv_file)
-            
             for i in render:
                 print(i)
                 ingredient = Ingredient()

@@ -35,6 +35,7 @@ class TagRecipeSerializer(serializers.ModelSerializer):
     name = serializers.StringRelatedField(read_only=True, source='tag.name')
     color = serializers.StringRelatedField(read_only=True, source='tag.color')
     slug = serializers.StringRelatedField(read_only=True, source='tag.slug')
+
     class Meta:
         model = TagRecipe
         fields = (
@@ -57,7 +58,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         read_only=True,
         source='base_ingredient.id'
     )
-    
+
     class Meta:
         model = IngredientRecipe
         fields = (
@@ -72,6 +73,7 @@ class BaseIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для привязки Ингредиента к Рецепту."""
     id = serializers.IntegerField()
     amount = serializers.IntegerField(write_only=True)
+
     class Meta:
         model = BaseIngredientWithUnits
         fields = (
@@ -106,6 +108,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     )
     image = Base64ToImageField()
     text = serializers.CharField(source='description')
+
     class Meta:
         model = Recipe
         fields = (
@@ -116,13 +119,13 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         )
-    
+
     def to_representation(self, instance):
         """
         После создания рецепта, перенаправляет на Сериализатор Рецепта(чтение).
         """
         return RecipeSerializer(instance=instance, context=self.context).data
-    
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -140,7 +143,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 amount=ingredient['amount']
             )
         return recipe
-    
+
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -173,6 +176,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField(
         method_name='get_is_in_shopping_cart'
     )
+
     class Meta:
         model = Recipe
         fields = (
@@ -207,8 +211,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return self.boolean_harvester(Order, obj)
 
 
-
-
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериолизатор для Избранного Рецепта."""
     id = serializers.IntegerField(source='recipe.id', read_only=True)
@@ -221,6 +223,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
     cooking_time = serializers.IntegerField(
         source='recipe.cooking_time', read_only=True
     )
+
     class Meta:
         model = Favorite
         fields = (
@@ -238,7 +241,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         except KeyError:
             raise ValidationError('KeyError')
         return super().validate_empty_values(data)
-    
+
     def validate(self, data):
         if self.context['request'].user.is_anonymous:
             raise ValidationError(
@@ -251,7 +254,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         except KeyError:
             raise ValidationError('KeyError')
         recipe = get_object_or_404(Recipe, pk=recipe_id)
-        data['recipe'] =  recipe
+        data['recipe'] = recipe
         data['user'] = user
         if request.method == 'POST':
             if recipe.favorites.select_related('recipe').filter(user=user):
@@ -281,6 +284,7 @@ class OrderSerializer(serializers.ModelSerializer):
     cooking_time = serializers.IntegerField(
         source='recipe.cooking_time', read_only=True
     )
+
     class Meta:
         model = Order
         fields = (
@@ -289,7 +293,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
-    
+
     def validate_empty_values(self, data):
         """Формируем словарь context и проверяем ключи."""
         try:
@@ -298,7 +302,7 @@ class OrderSerializer(serializers.ModelSerializer):
         except KeyError:
             raise ValidationError('KeyError')
         return super().validate_empty_values(data)
-    
+
     def validate(self, data):
         if self.context['request'].user.is_anonymous:
             raise ValidationError(
@@ -311,7 +315,7 @@ class OrderSerializer(serializers.ModelSerializer):
         except KeyError:
             raise ValidationError('KeyError')
         recipe = get_object_or_404(Recipe, pk=recipe_id)
-        data['recipe'] =  recipe
+        data['recipe'] = recipe
         data['user'] = user
         if request.method == 'POST':
             if recipe.orders.select_related('recipe').filter(user=user):
