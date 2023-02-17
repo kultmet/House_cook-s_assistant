@@ -23,7 +23,7 @@ services:
     volumes:
       - static_value:/app/static/django/
       - media_value:/app/media/django/
-      - order_value:/app/orders/
+      - orders_value:/app/orders/
     depends_on:
       - db
     env_file:
