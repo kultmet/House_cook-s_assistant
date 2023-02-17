@@ -274,7 +274,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
                     'Рецепт уже в избранном'
                 )
         if request.method == 'DELETE':
-            print('request.method == DELETE')
             if not recipe.favorites.select_related(
                 'recipe'
             ).filter(user=user).exists():
