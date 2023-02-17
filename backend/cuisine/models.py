@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from django.core.validators import MinValueValidator
 User = get_user_model()
 
 
@@ -16,12 +16,13 @@ class BaseIngredientWithUnits(models.Model):
         max_length=30,
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name = 'Базовый ингредиент'
         verbose_name_plural = 'Базовые ингредиенты'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
 
 
 class Tag(models.Model):
@@ -71,7 +72,13 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveIntegerField(
         default=1,
-        verbose_name='Время приготовления'
+        verbose_name='Время приготовления',
+        validators=[
+            MinValueValidator(
+                1,
+                'Ты хочешь чтоб это готовили? Добавь время приготовления!'
+            ),
+        ]
     )
     description = models.TextField(verbose_name='Описание')
     image = models.ImageField(
@@ -84,10 +91,12 @@ class Recipe(models.Model):
         related_name='recipes',
         on_delete=models.CASCADE
     )
+    pub_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        ordering = ['-pub_date']
 
     def __str__(self):
         return self.name
@@ -120,14 +129,21 @@ class IngredientRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='ingredientrecipe'
     )
-    amount = models.IntegerField(
+    amount = models.PositiveIntegerField(
         verbose_name='Колличество',
-        default=None
+        default=None,
+        validators=[
+            MinValueValidator(
+                1,
+                'Как ты можеш добавить игнредиент колличеством меньше 1?'
+            ),
+        ]
     )
 
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        ordering = ['base_ingredient']
 
     def __str__(self):
         return (
@@ -168,6 +184,7 @@ class TagRecipe(models.Model):
                 name='unique_tag_for_recipe'
             ),
         ]
+        ordering = ['-recipe__pub_date']
         verbose_name_plural = 'Связующая таблици для тегов'
 
 
@@ -193,6 +210,7 @@ class Favorite(models.Model):
                 name='unique_favorite'
             ),
         ]
+        ordering = ['-recipe__pub_date']
 
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
@@ -220,5 +238,6 @@ class Order(models.Model):
                 name='unique_order'
             ),
         ]
+        ordering = ['-recipe__pub_date']
         verbose_name = 'Покупка'
         verbose_name_plural = 'Покупки'
