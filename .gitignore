@@ -110,6 +110,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+infra/.env
 
 # Spyder project settings
 .spyderproject
@@ -135,5 +136,5 @@ dmypy.json
 
 # media folder
 
-backend/media/
+/backend/media
 
