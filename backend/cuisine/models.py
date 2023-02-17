@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 User = get_user_model()
 
 
@@ -78,6 +78,10 @@ class Recipe(models.Model):
                 1,
                 'Ты хочешь чтоб это готовили? Добавь время приготовления!'
             ),
+            MaxValueValidator(
+                10080,
+                'Ты предлагаешь готовить сюрстремминг? Ограничение - 10080.'
+            )
         ]
     )
     description = models.TextField(verbose_name='Описание')
@@ -137,6 +141,10 @@ class IngredientRecipe(models.Model):
                 1,
                 'Как ты можеш добавить игнредиент колличеством меньше 1?'
             ),
+            MaxValueValidator(
+                20000,
+                'Ты предлагаешь готовить для ВиллаРриба и ВиллаБаджо сразу?'
+            )
         ]
     )
 
@@ -151,16 +159,18 @@ class IngredientRecipe(models.Model):
             f' - {self.amount} {self.base_ingredient.measurement_unit}'
         )
 
-    def get_name(self):
-        return self.base_ingredient.name
-
     def get_base_ingredient(self):
+        """
+        Этот метод для вывода в админку
+        стокового отображения, Базового Ингредиента.
+        """
         return self.base_ingredient
 
-    def get_id(self):
-        return self.base_ingredient.id
-
     def get_measurement_unit(self):
+        """
+        Этот метод для вывода в админку
+        едениц измерение, Базового Ингредиента.
+        """
         return self.base_ingredient.measurement_unit
 
 

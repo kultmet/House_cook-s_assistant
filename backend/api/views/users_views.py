@@ -44,20 +44,17 @@ class CustomUserViewSet(
         """
         if self.action == 'follow' and self.request.method == 'POST':
             return CreateFollowSerializer
-        if self.action == "create":
+        if self.action == 'create':
             if settings.USER_CREATE_PASSWORD_RETYPE:
                 return settings.SERIALIZERS.user_create_password_retype
             return settings.SERIALIZERS.user_create
-        elif self.action == "set_password":
+        if self.action == 'set_password':
             if settings.SET_PASSWORD_RETYPE:
                 return settings.SERIALIZERS.set_password_retype
             return settings.SERIALIZERS.set_password
         return super().get_serializer_class()
 
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    @action(["post"], detail=False, permission_classes=IsAuthenticated)
+    @action(['post'], detail=False, permission_classes=IsAuthenticated)
     def set_password(self, request, *args, **kwargs):
         """Обрабатывает смену пароля."""
         request.data['email'] = request.user.email
@@ -65,11 +62,11 @@ class CustomUserViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        self.request.user.set_password(serializer.data["new_password"])
+        self.request.user.set_password(serializer.data['new_password'])
         self.request.user.save()
 
         if settings.PASSWORD_CHANGED_EMAIL_CONFIRMATION:
-            context = {"user": self.request.user}
+            context = {'user': self.request.user}
             to = [get_user_email(self.request.user)]
             settings.EMAIL.password_changed_confirmation(
                 self.request, context
