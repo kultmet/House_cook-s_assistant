@@ -5,13 +5,14 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
+
 from cuisine.models import (
-    Recipe,
-    Tag,
-    IngredientRecipe,
     BaseIngredientWithUnits,
     Favorite,
+    IngredientRecipe,
     Order,
+    Recipe,
+    Tag,
     TagRecipe
 )
 from api.serializers.users_serializers import UserSerializer
@@ -126,40 +127,51 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         """
         return RecipeSerializer(instance=instance, context=self.context).data
 
+    def bulk_create_for_tag_recipe(self, tags, recipe):
+        """Создает несколько связей Тегов с Рецептом."""
+        tag_objs = [TagRecipe(tag=tag, recipe=recipe) for tag in tags]
+        TagRecipe.objects.bulk_create(
+            objs=tag_objs,
+            batch_size=len(tag_objs)
+        )
+
+    def bulk_create_for_ingredient_recipe(self, ingredients, recipe):
+        """Создает несколько связей Ингредиентов с Рецептом."""
+        ingredient_objs = [
+            IngredientRecipe(
+                base_ingredient=get_object_or_404(
+                    BaseIngredientWithUnits,
+                    id=i['id']
+                ),
+                recipe=recipe,
+                amount=i['amount']
+            ) for i in ingredients
+        ]
+        IngredientRecipe.objects.bulk_create(
+            objs=ingredient_objs,
+            batch_size=len(ingredient_objs)
+        )
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
-        for tag in tags:
-            TagRecipe.objects.create(tag=tag, recipe=recipe)
-        for ingredient in ingredients:
-            base_ingredient = get_object_or_404(
-                BaseIngredientWithUnits,
-                id=ingredient['id']
-            )
-            IngredientRecipe.objects.create(
-                base_ingredient=base_ingredient,
-                recipe=recipe,
-                amount=ingredient['amount']
-            )
+        self.bulk_create_for_tag_recipe(tags=tags, recipe=recipe)
+        self.bulk_create_for_ingredient_recipe(
+            ingredients=ingredients, recipe=recipe
+        )
         return recipe
 
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = instance
-        for tag in tags:
-            TagRecipe.objects.get_or_create(tag=tag, recipe=recipe)
-        for ingredient in ingredients:
-            base_ingredient = get_object_or_404(
-                BaseIngredientWithUnits,
-                id=ingredient['id']
-            )
-            IngredientRecipe.objects.get_or_create(
-                base_ingredient=base_ingredient,
-                recipe=recipe,
-                amount=ingredient['amount']
-            )
+        TagRecipe.objects.filter(recipe=recipe).delete()
+        self.bulk_create_for_tag_recipe(tags=tags, recipe=recipe)
+        IngredientRecipe.objects.filter(recipe=recipe).delete()
+        self.bulk_create_for_ingredient_recipe(
+            ingredients=ingredients, recipe=recipe
+        )
         return super().update(instance, validated_data)
 
 
