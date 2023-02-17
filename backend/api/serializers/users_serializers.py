@@ -24,6 +24,9 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'is_subscribed',
         )
+        write_only_fields = (
+            'password',
+        )
 
     def get_is_subscribed(self, obj):
         if not self.context['request'].user.is_anonymous:

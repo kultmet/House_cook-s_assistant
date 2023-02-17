@@ -22,6 +22,7 @@ class ForModelAdmin(admin.ModelAdmin):
 class IngredienteInline(admin.TabularInline):
     model = IngredientRecipe
     extra = 0
+    min_num = 1
 
 
 class TagInline(admin.StackedInline):
