@@ -82,5 +82,5 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo POSTGRES_HOSTT=${{ secrets.POSTGRES_HOST }} >> .env
             echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env
-            echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
+            echo DJANGO_SECRET_KEY=$"{{ secrets.DJANGO_SECRET_KEY }}" >> .env
             sudo docker-compose up -d --build
