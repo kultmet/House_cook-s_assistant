@@ -19,7 +19,6 @@ from api.serializers.users_serializers import (
     UserSerializer, FollowSerializer, CreateFollowSerializer
 )
 from users.models import Follow
-from djoser import views
 
 
 User = get_user_model()
@@ -60,7 +59,7 @@ class CustomUserViewSet(
             return settings.SERIALIZERS.set_password
         return super().get_serializer_class()
 
-    @action(['post'], detail=False, permission_classes=[IsAuthenticated,])
+    @action(['post'], detail=False)
     def set_password(self, request, *args, **kwargs):
         """Обрабатывает смену пароля."""
         request.data['email'] = request.user.email
