@@ -129,7 +129,7 @@ class CustomUserViewSet(
         serializer_class=CreateFollowSerializer,
         permission_classes=(IsAuthenticated,)
     )
-    def follow(self, request, id):
+    def follow(self, request, pk):
         """Подписаться на автора, Отписаться от автора."""
         data = {}
         data['request'] = request
@@ -152,5 +152,5 @@ class CustomUserViewSet(
         user = serializer.validated_data['user']
         author = serializer.validated_data['author']
         instance = get_object_or_404(Follow, user=user, author=author)
-        self.perform_destroy(instance)
+        instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
