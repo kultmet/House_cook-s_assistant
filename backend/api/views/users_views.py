@@ -131,6 +131,7 @@ class CustomUserViewSet(
     )
     def follow(self, request, id):
         """Подписаться на автора, Отписаться от автора."""
+        print(request)
         data = {}
         data['request'] = request
         data['view'] = self
