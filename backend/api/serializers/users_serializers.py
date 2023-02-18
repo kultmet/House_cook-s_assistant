@@ -89,7 +89,6 @@ class CreateFollowSerializer(serializers.ModelSerializer):
         fields = ()
 
     def validate_empty_values(self, data):
-        print(data, 'valida empty')
         try:
             self.context['request'] = data['request']
             self.context['view'] = data['view']
@@ -101,7 +100,7 @@ class CreateFollowSerializer(serializers.ModelSerializer):
         try:
             request = self.context['request']
             user = request.user
-            author_id = self.context['view'].kwargs.get('id')
+            author_id = self.context['view'].kwargs.get('pk')
         except KeyError:
             raise ValidationError('KeyError')
         author = get_object_or_404(User, id=author_id)
