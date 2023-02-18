@@ -8,7 +8,6 @@ services:
       - ./.env
   frontend:
     image: kultmet/foodgram_frontend
-    build: foodgram_frontend
     restart: always
     volumes:
       - ../frontend/:/app/result_build/
