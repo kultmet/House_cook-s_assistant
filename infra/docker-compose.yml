@@ -3,24 +3,27 @@ services:
   db:
     image: postgres:13.0-alpine
     volumes:
-      - /var/lib/postgresql/data/
+      - db_value:/var/lib/postgresql/data/
     env_file:
       - ./.env
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: kultmet/foodgram_frontend
+    # build: foodgram_frontend
+    restart: always
     volumes:
       - ../frontend/:/app/result_build/
 
   web:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    # build:
+    #   context: ../backend
+    #   dockerfile: Dockerfile
+    image: kultmet/foodgram_backend
+    # build: foodgram_backend
     restart: always
     volumes:
       - static_value:/app/static/django/
       - media_value:/app/media/django/
+      - orders_value:/app/orders/
     depends_on:
       - db
     env_file:
@@ -42,4 +45,6 @@ services:
 volumes:
   static_value:
   media_value:
+  orders_value:
+  db_value:
 

@@ -1,14 +1,13 @@
-name: Django CI
+name: Django CI/CD
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "dev" ]
   pull_request:
     branches: [ "master" ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -57,3 +56,4 @@ jobs:
     #     file: ./frontend/Dockerfile
     #     push: true
     #     tags: kultmet/foodgram_frontend:latest
+  
