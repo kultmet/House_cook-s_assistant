@@ -1,0 +1,34 @@
+name: Django CD
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_and_push_to_docker_hub
+    steps:
+      - name: executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          script: |
+            sudo systemctl stop nginx
+            sudo docker pull kultmet/foodgram_backend
+            sudo docker pull kultmet/foodgram_frontend
+            sudo docker-compose stop
+            sudo docker-compose rm web
+            sudo rm .env
+            touch .env
+            echo POSTGRES_ENGINE=${{ secrets.POSTGRES_ENGINE }} >> .env
+            echo POSTGRES_NAME=${{ secrets.POSTGRES_NAME }} >> .env
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+            echo POSTGRES_HOSTT=${{ secrets.POSTGRES_HOST }} >> .env
+            echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env
+            echo DJANGO_SECRET_KEY=$"{{ secrets.DJANGO_SECRET_KEY }}" >> .env
+            sudo docker-compose up -d --build
