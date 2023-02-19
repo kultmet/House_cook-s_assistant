@@ -59,7 +59,6 @@ class RecipeVievSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilterSet
-    ordering = ('-pub_date',)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH', 'DELETE'):
