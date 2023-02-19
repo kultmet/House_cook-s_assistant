@@ -18,7 +18,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['http://*.127.0.0.1', 'localhost']
+# CSRF_TRUSTED_ORIGINS = ['http://*.127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -75,12 +75,12 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('POSTGRES_ENGINE'),
-        'NAME': os.getenv('POSTGRES_NAME'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST'),
-        'PORT': os.getenv('POSTGRES_PORT')
+        'ENGINE': os.getenv('POSTGRES_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('POSTGRES_NAME', 'postgres'),
+        'USER': os.getenv('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.getenv('POSTGRES_HOST', 'db'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432')
     }
 }
 
@@ -127,7 +127,7 @@ DJOSER = {
         'user': 'api.serializers.users_serializers.UserSerializer',
         'current_user': 'api.serializers.users_serializers.UserSerializer',
     },
-    'PERMISSIONS': {'user_list': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],},
+    'PERMISSIONS': {'user_list': ['rest_framework.permissions.IsAuthenticatedOrReadOnly',],},
     'HIDE_USERS': False
 }
 

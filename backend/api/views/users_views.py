@@ -37,6 +37,11 @@ class CustomUserViewSet(
     serializer_class = UserSerializer
     permission_classes = [AllowAny,]
 
+    def get_permissions(self):
+        if self.action == "set_password":
+            self.permission_classes = settings.PERMISSIONS.set_password
+        return super().get_permissions()
+
     def get_serializer_class(self):
         """
         Указываем сериализаторы для создания Подписки,
@@ -54,7 +59,7 @@ class CustomUserViewSet(
             return settings.SERIALIZERS.set_password
         return super().get_serializer_class()
 
-    @action(['post'], detail=False, permission_classes=IsAuthenticated)
+    @action(['post'], detail=False)
     def set_password(self, request, *args, **kwargs):
         """Обрабатывает смену пароля."""
         request.data['email'] = request.user.email
@@ -124,7 +129,7 @@ class CustomUserViewSet(
         serializer_class=CreateFollowSerializer,
         permission_classes=(IsAuthenticated,)
     )
-    def follow(self, request, id):
+    def follow(self, request, pk):
         """Подписаться на автора, Отписаться от автора."""
         data = {}
         data['request'] = request
@@ -147,5 +152,5 @@ class CustomUserViewSet(
         user = serializer.validated_data['user']
         author = serializer.validated_data['author']
         instance = get_object_or_404(Follow, user=user, author=author)
-        self.perform_destroy(instance)
+        instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

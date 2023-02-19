@@ -9,16 +9,15 @@ services:
   frontend:
     image: kultmet/foodgram_frontend
     # build: foodgram_frontend
-    restart: always
     volumes:
       - ../frontend/:/app/result_build/
 
   web:
-    # build:
-    #   context: ../backend
-    #   dockerfile: Dockerfile
-    image: kultmet/foodgram_backend
-    # build: foodgram_backend
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    # image: kultmet/foodgram_backend
+    # # build: foodgram_backend
     restart: always
     volumes:
       - static_value:/app/static/django/

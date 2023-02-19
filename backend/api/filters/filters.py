@@ -5,8 +5,10 @@ from cuisine.models import Recipe
 
 
 class RecipeFilterSet(filters.FilterSet):
-    tags = django_filters.AllValuesMultipleFilter(
-        'tags__slug', method='tags_filter', lookup_expr='exact'
+    tags = django_filters.MultipleChoiceFilter(
+        'tags__slug',
+        method='tags_filter',
+        lookup_expr='exact',
     )
     is_favorited = django_filters.NumberFilter(
         method='is_favorited_filter', distinct=True
@@ -25,11 +27,7 @@ class RecipeFilterSet(filters.FilterSet):
         )
 
     def tags_filter(self, queryset, name, value):
-        queryset = Recipe.objects.none()
-        for tag_slug in value:
-            queryset = queryset.union(
-                Recipe.objects.filter(tags__slug=tag_slug)
-            )
+        queryset = Recipe.objects.filter(tags__slug__in=value)
         return queryset
 
     def binary_validator(self, name, value):
