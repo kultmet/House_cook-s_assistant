@@ -5,10 +5,10 @@ from cuisine.models import Recipe
 
 
 class RecipeFilterSet(filters.FilterSet):
-    tags = django_filters.MultipleChoiceFilter(
+    tags = django_filters.AllValuesMultipleFilter(
         'tags__slug',
         method='tags_filter',
-        lookup_expr='exact',
+        lookup_expr='in',
     )
     is_favorited = django_filters.NumberFilter(
         method='is_favorited_filter', distinct=True
