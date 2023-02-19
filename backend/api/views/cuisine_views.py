@@ -57,8 +57,9 @@ class RecipeVievSet(ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = CustomPaginator
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = RecipeFilterSet
+    ordering_fields = ('pub_date',) 
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH', 'DELETE'):
