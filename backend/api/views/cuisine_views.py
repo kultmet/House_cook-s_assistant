@@ -57,7 +57,7 @@ class RecipeVievSet(ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = CustomPaginator
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
+    filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RecipeFilterSet
     ordering = ('-pub_date',)
 
