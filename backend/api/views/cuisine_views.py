@@ -59,7 +59,7 @@ class RecipeVievSet(ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = RecipeFilterSet
-    ordering_fields = ('-pub_date',)
+    ordering = ('-pub_date',)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH', 'DELETE'):
