@@ -27,7 +27,7 @@ class RecipeFilterSet(filters.FilterSet):
         )
 
     def tags_filter(self, queryset, name, value):
-        queryset = Recipe.objects.filter(tags__slug__in=value)
+        queryset = Recipe.objects.filter(tags__slug__in=value).distinct()
         return queryset
 
     def binary_validator(self, name, value):
