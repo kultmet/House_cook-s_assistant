@@ -1,19 +1,19 @@
 import django_filters
 from django_filters import rest_framework as filters
 from rest_framework.exceptions import ValidationError
-from cuisine.models import Recipe
+from cuisine.models import Recipe, Tag
 
 
 class RecipeFilterSet(filters.FilterSet):
-    tags = django_filters.AllValuesMultipleFilter(
-        'tags__slug',
-        method='tags_filter',
-        lookup_expr='in',
+    tags = django_filters.ModelMultipleChoiceFilter(
+        field_name='tags__slug',
+        to_field_name='slug',
+        queryset=Tag.objects.all()
     )
-    is_favorited = django_filters.NumberFilter(
-        method='is_favorited_filter', distinct=True
+    is_favorited = django_filters.BooleanFilter(
+        method='is_favorited_filter'
     )
-    is_in_shopping_cart = django_filters.NumberFilter(
+    is_in_shopping_cart = django_filters.BooleanFilter(
         method='is_in_shopping_cart_filter', distinct=True
     )
 
@@ -27,7 +27,7 @@ class RecipeFilterSet(filters.FilterSet):
         )
 
     def tags_filter(self, queryset, name, value):
-        queryset = Recipe.objects.filter(tags__slug__in=value).distinct()
+        queryset = queryset.filter(tags__slug__in=value).distinct()
         return queryset
 
     def binary_validator(self, name, value):
@@ -53,8 +53,8 @@ class RecipeFilterSet(filters.FilterSet):
         user = self.request.user
         if user.is_anonymous:
             return queryset
-        favorite_recipes = Recipe.objects.filter(favorites__user=user)
-        exclude_favorite_recipes = Recipe.objects.exclude(
+        favorite_recipes = queryset.filter(favorites__user=user)
+        exclude_favorite_recipes = queryset.exclude(
             favorites__user=user
         )
         return self.returns_orthodox_queryset(
@@ -68,8 +68,8 @@ class RecipeFilterSet(filters.FilterSet):
         user = self.request.user
         if user.is_anonymous:
             return queryset
-        in_order_recipes = Recipe.objects.filter(orders__user=user)
-        exclude_in_order_recipes = Recipe.objects.exclude(orders__user=user)
+        in_order_recipes = queryset.filter(orders__user=user)
+        exclude_in_order_recipes = queryset.exclude(orders__user=user)
         return self.returns_orthodox_queryset(
             value=value,
             result=in_order_recipes,
