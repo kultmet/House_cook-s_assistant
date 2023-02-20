@@ -10,10 +10,10 @@ class RecipeFilterSet(filters.FilterSet):
         to_field_name='slug',
         queryset=Tag.objects.all()
     )
-    is_favorited = django_filters.BooleanFilter(
+    is_favorited = django_filters.NumberFilter(
         method='is_favorited_filter'
     )
-    is_in_shopping_cart = django_filters.BooleanFilter(
+    is_in_shopping_cart = django_filters.NumberFilter(
         method='is_in_shopping_cart_filter', distinct=True
     )
 
@@ -52,11 +52,12 @@ class RecipeFilterSet(filters.FilterSet):
         self.binary_validator(name=name, value=value)
         user = self.request.user
         if user.is_anonymous:
-            return queryset
+            return Recipe.objects.none()
         favorite_recipes = queryset.filter(favorites__user=user)
         exclude_favorite_recipes = queryset.exclude(
             favorites__user=user
         )
+        print(favorite_recipes)
         return self.returns_orthodox_queryset(
             value=value,
             result=favorite_recipes,
@@ -67,7 +68,7 @@ class RecipeFilterSet(filters.FilterSet):
         self.binary_validator(name=name, value=value)
         user = self.request.user
         if user.is_anonymous:
-            return queryset
+            return Recipe.objects.none()
         in_order_recipes = queryset.filter(orders__user=user)
         exclude_in_order_recipes = queryset.exclude(orders__user=user)
         return self.returns_orthodox_queryset(
