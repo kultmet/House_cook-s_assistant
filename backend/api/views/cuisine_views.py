@@ -90,9 +90,10 @@ class RecipeVievSet(ModelViewSet):
         result = txt_generator(calculation_results, file_adrass)
         response = HttpResponse(
             result,
-            content_type='text/txt',
+            content_type='application/text charset=utf-8',
         )
         response['Content-Disposition'] = f'attachment; filename={filename}'
+        # response['content_type'] = 'text/plain'
         return response
 
 

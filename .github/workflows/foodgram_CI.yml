@@ -49,11 +49,11 @@ jobs:
         file: ./backend/Dockerfile
         push: true
         tags: kultmet/foodgram_backend:latest
-    # - name: Push to Docker Hub Frontend
-    #   uses: docker/build-push-action@v2
-    #   with:
-    #     context: ./frontend/
-    #     file: ./frontend/Dockerfile
-    #     push: true
-    #     tags: kultmet/foodgram_frontend:latest
+    - name: Push to Docker Hub Frontend
+      uses: docker/build-push-action@v2
+      with:
+        context: ./frontend/
+        file: ./frontend/Dockerfile
+        push: true
+        tags: kultmet/foodgram_frontend:latest
   
