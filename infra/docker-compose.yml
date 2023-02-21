@@ -7,7 +7,10 @@ services:
     env_file:
       - ./.env
   frontend:
-    image: kultmet/foodgram_frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    # image: kultmet/foodgram_frontend
     # build: foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
