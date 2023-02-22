@@ -2,6 +2,7 @@ import uuid
 import base64
 
 from django.core.files.base import ContentFile
+from django.core.validators import MinValueValidator, MaxValueValidator
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework.exceptions import ValidationError
@@ -73,7 +74,19 @@ class IngredientSerializer(serializers.ModelSerializer):
 class BaseIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для привязки Ингредиента к Рецепту."""
     id = serializers.IntegerField()
-    amount = serializers.IntegerField(write_only=True)
+    amount = serializers.IntegerField(
+        write_only=True,
+        validators=[
+            MinValueValidator(
+                1,
+                'Как ты можеш добавить игнредиент колличеством меньше 1?'
+            ),
+            MaxValueValidator(
+                20000,
+                'Ты предлагаешь готовить для ВиллаРриба и ВиллаБаджо сразу?'
+            )
+        ]
+    )
 
     class Meta:
         model = BaseIngredientWithUnits
@@ -109,6 +122,21 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     )
     image = Base64ToImageField()
     text = serializers.CharField(source='description')
+    cooking_time = serializers.IntegerField(
+        validators=[
+            MinValueValidator(
+                1,
+                'Ты хочешь чтоб это готовили? Добавь время приготовления!'
+            ),
+            MaxValueValidator(
+                10080,
+                message=(
+                    'Ты предлагаешь готовить сюрстремминг?'
+                    'Ограничение - 10080.'
+                ),
+            )
+        ]
+    )
 
     class Meta:
         model = Recipe
